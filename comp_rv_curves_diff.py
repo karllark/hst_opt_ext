@@ -55,7 +55,7 @@ if __name__ == '__main__':
 
     fig, ax = plt.subplots(nrows=2, figsize=(6., 10.), sharex=True)
 
-    plot_exvebv = True
+    plot_exvebv = False
 
     # generate the curves and plot them
     x = np.arange(1.0, 3.01, 0.1)/u.micron
@@ -63,19 +63,27 @@ if __name__ == '__main__':
     cols = ['b', 'k', 'r', 'g']
 
     dmodel = [None, M14]
+    if plot_exvebv:
+        yoff_delta = 0.4
+    else:
+        yoff_delta = 0.1
     for k, cmodel in enumerate(dmodel):
         plot_rv_set(ax[k], CCM89, Rvs, cols, ':',
                     diff_model=cmodel,
-                    plot_exvebv=plot_exvebv)
+                    plot_exvebv=plot_exvebv,
+                    yoff_delta=yoff_delta)
         plot_rv_set(ax[k], O94, Rvs, cols, '--',
                     diff_model=cmodel,
-                    plot_exvebv=plot_exvebv)
+                    plot_exvebv=plot_exvebv,
+                    yoff_delta=yoff_delta)
         plot_rv_set(ax[k], F04, Rvs, cols, '-',
                     diff_model=cmodel,
-                    plot_exvebv=plot_exvebv)
+                    plot_exvebv=plot_exvebv,
+                    yoff_delta=yoff_delta)
         plot_rv_set(ax[k], M14, Rvs, cols, '-.',
                     diff_model=cmodel,
-                    plot_exvebv=plot_exvebv)
+                    plot_exvebv=plot_exvebv,
+                    yoff_delta=yoff_delta)
 
     if plot_exvebv:
         ax[0].set_ylabel(r'$k(\lambda - 55)$')
