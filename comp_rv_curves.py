@@ -9,6 +9,7 @@ from dust_extinction.parameter_averages import (CCM89, O94, F04, M14)
 
 
 def plot_rv_set(model,
+                x,
                 rvs,
                 cols,
                 linestyle,
@@ -16,10 +17,13 @@ def plot_rv_set(model,
 
     for k, cur_Rv in enumerate(Rvs):
         ext_model = model(Rv=cur_Rv)
-        yvals = ext_model(x)
+        indxs, = np.where(np.logical_and(
+            x.value >= ext_model.x_range[0],
+            x.value <= ext_model.x_range[1]))
+        yvals = ext_model(x[indxs])
         if plot_exvebv:
             yvals = (yvals - 1.0)*cur_Rv
-        ax.plot(x, yvals,
+        ax.plot(x[indxs], yvals,
                 linestyle=linestyle, color=cols[k])
 
 
@@ -40,23 +44,26 @@ if __name__ == '__main__':
 
     fig, ax = plt.subplots(figsize=(10., 6.))
 
-    plot_exvebv = False
+    plot_exvebv = True
 
     # generate the curves and plot them
-    x = np.arange(1.0, 3.0, 0.1)/u.micron
+    x = np.arange(0.5, 8.71, 0.1)/u.micron
     Rvs = [2.5, 3.1, 4.5, 6.0]
     cols = ['b', 'k', 'r', 'g']
 
-    plot_rv_set(CCM89, Rvs, cols, ':', plot_exvebv=plot_exvebv)
+    plot_rv_set(CCM89, x, Rvs, cols, ':', plot_exvebv=plot_exvebv)
 
-    plot_rv_set(O94, Rvs, cols, '--', plot_exvebv=plot_exvebv)
+    plot_rv_set(O94, x, Rvs, cols, '--', plot_exvebv=plot_exvebv)
 
-    plot_rv_set(F04, Rvs, cols, '-', plot_exvebv=plot_exvebv)
+    plot_rv_set(F04, x, Rvs, cols, '-', plot_exvebv=plot_exvebv)
 
-    plot_rv_set(M14, Rvs, cols, '-.', plot_exvebv=plot_exvebv)
+    plot_rv_set(M14, x, Rvs, cols, '-.', plot_exvebv=plot_exvebv)
 
     ax.set_xlabel(r'$x$ [$\mu m^{-1}$]')
-    ax.set_ylabel(r'$A(x)/A(V)$')
+    if plot_exvebv:
+        ax.set_ylabel(r'$E(\lambda - V)/E(B-V)$')
+    else:
+        ax.set_ylabel(r'$A(x)/A(V)$')
 
     # legend for R(V) model type
     custom_lines = [Line2D([0], [0], color='b', linestyle='-', lw=2),
