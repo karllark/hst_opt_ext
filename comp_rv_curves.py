@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
 import matplotlib as mpl
 
-from dust_extinction.parameter_averages import (CCM89, O94, F04, M14)
+from dust_extinction.parameter_averages import (CCM89, O94, F99, F04, M14, F19)
 
 
 def plot_rv_set(model,
@@ -55,9 +55,11 @@ if __name__ == '__main__':
 
     plot_rv_set(O94, x, Rvs, cols, '--', plot_exvebv=plot_exvebv)
 
-    plot_rv_set(F04, x, Rvs, cols, '-', plot_exvebv=plot_exvebv)
+    plot_rv_set(F04, x, Rvs, cols, '-.', plot_exvebv=plot_exvebv)
 
-    plot_rv_set(M14, x, Rvs, cols, '-.', plot_exvebv=plot_exvebv)
+    plot_rv_set(F19, x, Rvs, cols, '-', plot_exvebv=plot_exvebv)
+
+    # plot_rv_set(M14, x, Rvs, cols, '-.', plot_exvebv=plot_exvebv)
 
     ax.set_xlabel(r'$x$ [$\mu m^{-1}$]')
     if plot_exvebv:
@@ -78,10 +80,10 @@ if __name__ == '__main__':
     # legend for R(V) model type
     custom_lines = [Line2D([0], [0], color='k', linestyle=':', lw=2),
                     Line2D([0], [0], color='k', linestyle='--', lw=2),
-                    Line2D([0], [0], color='k', linestyle='-', lw=2),
-                    Line2D([0], [0], color='k', linestyle='-.', lw=2)]
+                    Line2D([0], [0], color='k', linestyle='-.', lw=2),
+                    Line2D([0], [0], color='k', linestyle='-', lw=2)]
 
-    ax.legend(custom_lines, ['CCM89', 'O94', 'F04', 'M14'],
+    ax.legend(custom_lines, ['CCM89', 'O94', 'F04', 'F19'],
               loc='upper left')
 
     ax.add_artist(leg1)

@@ -1,3 +1,5 @@
+import argparse
+
 import numpy as np
 import astropy.units as u
 
@@ -5,7 +7,7 @@ import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
 import matplotlib as mpl
 
-from dust_extinction.parameter_averages import (CCM89, O94, F04, M14)
+from dust_extinction.parameter_averages import (CCM89, O94, F04, M14, F19)
 
 
 def plot_rv_set(ax,
@@ -19,13 +21,18 @@ def plot_rv_set(ax,
 
     for k, cur_Rv in enumerate(Rvs):
         ext_model = model(Rv=cur_Rv)
-        yvals = ext_model(x)
+
+        indxs, = np.where(np.logical_and(
+            x.value >= ext_model.x_range[0],
+            x.value <= ext_model.x_range[1]))
+        yvals = ext_model(x[indxs])
+
         if plot_exvebv:
             yvals = (yvals - 1.0)*cur_Rv
 
         if diff_model is not None:
             dmodel = diff_model(Rv=cur_Rv)
-            dvals = dmodel(x)
+            dvals = dmodel(x[indxs])
             if plot_exvebv:
                 dvals = (dvals - 1.0)*cur_Rv
             yvals = yvals - dvals
@@ -34,11 +41,21 @@ def plot_rv_set(ax,
         else:
             yoff = 0.0
 
-        ax.plot(x, yvals + yoff,
+        ax.plot(x[indxs], yvals + yoff,
                 linestyle=linestyle, color=cols[k])
+
+        if model == F19:
+            ax.plot(x[indxs], yvals + yoff, 'ko',
+                    markersize=5, markevery=5, markerfacecolor="None")
 
 
 if __name__ == '__main__':
+
+    # commandline parser
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--pdf", help="save figure as a pdf file",
+                        action="store_true")
+    args = parser.parse_args()
 
     fontsize = 12
 
@@ -53,16 +70,17 @@ if __name__ == '__main__':
     mpl.rc('ytick.major', width=2)
     mpl.rc('ytick.minor', width=2)
 
-    fig, ax = plt.subplots(nrows=2, figsize=(6., 10.), sharex=True)
+    fig, ax = plt.subplots(nrows=2, figsize=(8., 10.), sharex=True)
 
-    plot_exvebv = False
+    plot_exvebv = True
 
     # generate the curves and plot them
-    x = np.arange(1.0, 3.01, 0.1)/u.micron
+    # x = np.arange(1.0, 3.01, 0.025)/u.micron
+    x = np.arange(0.5, 8.70, 0.025)/u.micron
     Rvs = [2.5, 3.1, 4.5, 6.0]
     cols = ['b', 'k', 'r', 'g']
 
-    dmodel = [None, M14]
+    dmodel = [None, F19]
     if plot_exvebv:
         yoff_delta = 0.4
     else:
@@ -84,13 +102,17 @@ if __name__ == '__main__':
                     diff_model=cmodel,
                     plot_exvebv=plot_exvebv,
                     yoff_delta=yoff_delta)
+        plot_rv_set(ax[k], F19, Rvs, cols, '-',
+                    diff_model=cmodel,
+                    plot_exvebv=plot_exvebv,
+                    yoff_delta=yoff_delta)
 
     if plot_exvebv:
         ax[0].set_ylabel(r'$k(\lambda - 55)$')
-        ax[1].set_ylabel(r'$k(\lambda - 55) - k(\lambda - 55)_{M14}$')
+        ax[1].set_ylabel(r'$k(\lambda - 55) - k(\lambda - 55)_{F19}$')
     else:
         ax[0].set_ylabel(r'$A(x)/A(V)$')
-        ax[1].set_ylabel(r'$A(x)/A(V) - \left( A(x)/A(V) \right)_{M14}$')
+        ax[1].set_ylabel(r'$A(x)/A(V) - \left( A(x)/A(V) \right)_{F19}$')
 
     ax[1].set_xlabel(r'$x$ [$\mu m^{-1}$]')
 
@@ -108,9 +130,11 @@ if __name__ == '__main__':
     custom_lines = [Line2D([0], [0], color='k', linestyle=':', lw=2),
                     Line2D([0], [0], color='k', linestyle='--', lw=2),
                     Line2D([0], [0], color='k', linestyle='-', lw=2),
-                    Line2D([0], [0], color='k', linestyle='-.', lw=2)]
+                    Line2D([0], [0], color='k', linestyle='-.', lw=2),
+                    Line2D([0], [0], color='k', linestyle='-', lw=2,
+                           marker='o', markersize=5, markerfacecolor="None")]
 
-    ax[0].legend(custom_lines, ['CCM89', 'O94', 'F04', 'M14'],
+    ax[0].legend(custom_lines, ['CCM89', 'O94', 'F04', 'M14', 'F19'],
                  loc='upper left')
 
     ax[0].add_artist(leg1)
@@ -119,4 +143,8 @@ if __name__ == '__main__':
 
     plt.tight_layout()
 
-    plt.show()
+    save_file = 'comp_rv_curves_diff.pdf'
+    if args.pdf:
+        fig.savefig(save_file)
+    else:
+        plt.show()
