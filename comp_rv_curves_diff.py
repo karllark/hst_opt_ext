@@ -7,7 +7,8 @@ import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
 import matplotlib as mpl
 
-from dust_extinction.parameter_averages import (CCM89, O94, F04, M14, F19)
+from dust_extinction.parameter_averages import (CCM89, O94, F04, VCG04,
+                                                GCC09, M14, F19)
 
 
 def plot_rv_set(ax,
@@ -72,47 +73,49 @@ if __name__ == '__main__':
 
     fig, ax = plt.subplots(nrows=2, figsize=(8., 10.), sharex=True)
 
-    plot_exvebv = True
+    plot_exvebv = False
+    opt_only = False
 
     # generate the curves and plot them
     # x = np.arange(1.0, 3.01, 0.025)/u.micron
-    x = np.arange(0.5, 8.70, 0.025)/u.micron
+    if opt_only:
+        x = np.arange(1.0, 3.3, 0.025)/u.micron
+        pmodels = [CCM89, O94, F04, M14, F19]
+        pmodel_names = ['CCM89', 'O94', 'F04', 'M14', 'F19']
+        if plot_exvebv:
+            yoff_delta = 0.4
+        else:
+            yoff_delta = 0.1
+    else:
+        x = np.arange(3.3, 8.70, 0.025)/u.micron
+        pmodels = [CCM89, VCG04, F04, GCC09, F19]
+        pmodel_names = ['CCM89', 'VCG04', 'F04', 'GCC09', 'F19']
+        if plot_exvebv:
+            yoff_delta = 2.0
+        else:
+            yoff_delta = 1.0
+
     Rvs = [2.5, 3.1, 4.5, 6.0]
     cols = ['b', 'k', 'r', 'g']
 
     dmodel = [None, F19]
-    if plot_exvebv:
-        yoff_delta = 0.4
-    else:
-        yoff_delta = 0.1
+
+    linetypes = [':', '--', '-', '-.', '-']
     for k, cmodel in enumerate(dmodel):
-        plot_rv_set(ax[k], CCM89, Rvs, cols, ':',
-                    diff_model=cmodel,
-                    plot_exvebv=plot_exvebv,
-                    yoff_delta=yoff_delta)
-        plot_rv_set(ax[k], O94, Rvs, cols, '--',
-                    diff_model=cmodel,
-                    plot_exvebv=plot_exvebv,
-                    yoff_delta=yoff_delta)
-        plot_rv_set(ax[k], F04, Rvs, cols, '-',
-                    diff_model=cmodel,
-                    plot_exvebv=plot_exvebv,
-                    yoff_delta=yoff_delta)
-        plot_rv_set(ax[k], M14, Rvs, cols, '-.',
-                    diff_model=cmodel,
-                    plot_exvebv=plot_exvebv,
-                    yoff_delta=yoff_delta)
-        plot_rv_set(ax[k], F19, Rvs, cols, '-',
-                    diff_model=cmodel,
-                    plot_exvebv=plot_exvebv,
-                    yoff_delta=yoff_delta)
+        for i, cpmodel in enumerate(pmodels):
+            plot_rv_set(ax[k], cpmodel, Rvs, cols, linetypes[i],
+                        diff_model=cmodel,
+                        plot_exvebv=plot_exvebv,
+                        yoff_delta=yoff_delta)
 
     if plot_exvebv:
         ax[0].set_ylabel(r'$k(\lambda - 55)$')
-        ax[1].set_ylabel(r'$k(\lambda - 55) - k(\lambda - 55)_{F19}$')
+        ax[1].set_ylabel(
+            r'$k(\lambda - 55) - k(\lambda - 55)_{F19}$ + offset')
     else:
         ax[0].set_ylabel(r'$A(x)/A(V)$')
-        ax[1].set_ylabel(r'$A(x)/A(V) - \left( A(x)/A(V) \right)_{F19}$')
+        ax[1].set_ylabel(
+            r'$A(x)/A(V) - \left( A(x)/A(V) \right)_{F19}$ + offset')
 
     ax[1].set_xlabel(r'$x$ [$\mu m^{-1}$]')
 
@@ -134,7 +137,7 @@ if __name__ == '__main__':
                     Line2D([0], [0], color='k', linestyle='-', lw=2,
                            marker='o', markersize=5, markerfacecolor="None")]
 
-    ax[0].legend(custom_lines, ['CCM89', 'O94', 'F04', 'M14', 'F19'],
+    ax[0].legend(custom_lines, pmodel_names,
                  loc='upper left')
 
     ax[0].add_artist(leg1)
