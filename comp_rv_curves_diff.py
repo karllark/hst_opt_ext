@@ -73,7 +73,7 @@ if __name__ == '__main__':
 
     fig, ax = plt.subplots(nrows=2, figsize=(8., 10.), sharex=True)
 
-    plot_exvebv = False
+    plot_exvebv = True
     opt_only = False
 
     # generate the curves and plot them
