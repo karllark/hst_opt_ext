@@ -54,6 +54,8 @@ if __name__ == '__main__':
 
     # commandline parser
     parser = argparse.ArgumentParser()
+    parser.add_argument("--opt_only", help="plot the optical",
+                        action="store_true")
     parser.add_argument("--pdf", help="save figure as a pdf file",
                         action="store_true")
     args = parser.parse_args()
@@ -74,11 +76,10 @@ if __name__ == '__main__':
     fig, ax = plt.subplots(nrows=2, figsize=(8., 10.), sharex=True)
 
     plot_exvebv = True
-    opt_only = False
 
     # generate the curves and plot them
     # x = np.arange(1.0, 3.01, 0.025)/u.micron
-    if opt_only:
+    if args.opt_only:
         x = np.arange(1.0, 3.3, 0.025)/u.micron
         pmodels = [CCM89, O94, F04, M14, F19]
         pmodel_names = ['CCM89', 'O94', 'F04', 'M14', 'F19']
@@ -95,7 +96,7 @@ if __name__ == '__main__':
         else:
             yoff_delta = 1.0
 
-    Rvs = [2.5, 3.1, 4.5, 6.0]
+    Rvs = [2.5, 3.1, 4.5]
     cols = ['b', 'k', 'r', 'g']
 
     dmodel = [None, F19]
@@ -120,13 +121,12 @@ if __name__ == '__main__':
     ax[1].set_xlabel(r'$x$ [$\mu m^{-1}$]')
 
     # legend for R(V) model type
-    custom_lines = [Line2D([0], [0], color='g', linestyle='-', lw=2),
-                    Line2D([0], [0], color='r', linestyle='-', lw=2),
+    custom_lines = [Line2D([0], [0], color='b', linestyle='-', lw=2),
                     Line2D([0], [0], color='k', linestyle='-', lw=2),
-                    Line2D([0], [0], color='b', linestyle='-', lw=2)]
+                    Line2D([0], [0], color='r', linestyle='-', lw=2)]
 
-    leg1 = ax[0].legend(custom_lines, ['R(V) = 6.0', 'R(V) = 4.5',
-                        'R(V) = 3.1', 'R(V) = 2.5'],
+    leg1 = ax[0].legend(custom_lines, ['R(V) = 2.5',
+                        'R(V) = 3.1', 'R(V) = 4.5'],
                         loc='lower right')
 
     # legend for R(V) model type
@@ -146,7 +146,12 @@ if __name__ == '__main__':
 
     plt.tight_layout()
 
-    save_file = 'comp_rv_curves_diff.pdf'
+    save_file = 'comp_rv_curves_diff_uv.pdf'
+    if args.opt_only:
+        print('test')
+        save_file.replace('uv.pdf', 'opt.pdf')
+        print(save_file)
+    print(save_file)
     if args.pdf:
         fig.savefig(save_file)
     else:
